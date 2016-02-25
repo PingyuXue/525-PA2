@@ -24,6 +24,8 @@ typedef struct BM_BufferPool {
   ReplacementStrategy strategy;
   void *mgmtData; // use this one to store the bookkeeping info your buffer 
                   // manager needs for a buffer pool
+  int numReadIO;                
+  int numWriteIO;                
 } BM_BufferPool;
 
 typedef struct BM_PageHandle {
@@ -71,6 +73,8 @@ RC initBufferPool(BM_BufferPool *const bm, const char *const pageFileName,
     bm->strategy = strategy;
     BM_PageHandle* buff = (BM_PageHandle *)calloc(numPages, sizeof(BM_PageHandle));
     bm->mgmtData = buff;
+    bm->numReadIO = 0;
+    bm->numWriteIO = 0;
     return RC_OK;
 }
 
