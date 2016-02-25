@@ -39,65 +39,123 @@ typedef struct BM_PageHandle {
 // Buffer Manager Interface Pool Handling
 
 /***************************************************************
- * Function Name: 
+ * Function Name: initBufferPool
  * 
- * Description:
+ * Description: initBufferPool creates a new buffer pool with numPages page frames using the page replacement strategy strategy. The pool is used to cache pages from the page file with name pageFileName. Initially, all page frames should be empty. The page file should already exist, i.e., this method should not generate a new page file. stratData can be used to pass parameters for the page replacement strategy. For example, for LRU-k this could be the parameter k.
  *
- * Parameters:
+ * Parameters: BM_BufferPool *const bm, const char *const pageFileName, const int numPages, ReplacementStrategy strategy, void *stratData.
  *
- * Return:
+ * Return: RC
  *
- * Author:
+ * Author: Xiaoliang Wu
  *
  * History:
  *      Date            Name                        Content
+ *      16/02/24        Xiaoliang Wu                Not init pageHandle.
  *
 ***************************************************************/
 
 RC initBufferPool(BM_BufferPool *const bm, const char *const pageFileName, 
 		  const int numPages, ReplacementStrategy strategy, 
 		  void *stratData){
+    FILE *file;
+
+    file = fopen(pageFileName, "r");
+    if(file == NULL){
+        return RC_FILE_NOT_FOUND;
+    }else{
+        fclose(file);
+    }
+    bm->pageFile = (char *)pageFileName;
+    bm->numPages = numPages;
+    bm->strategy = strategy;
+    BM_PageHandle* buff = (BM_PageHandle *)calloc(numPages, sizeof(BM_PageHandle));
+    bm->mgmtData = buff;
+    return RC_OK;
 }
 
 /***************************************************************
- * Function Name: 
+ * Function Name: shutdownBufferPool
  * 
- * Description:
+ * Description: shutdownBufferPool destroys a buffer pool. This method should free up all resources associated with buffer pool. For example, it should free the memory allocated for page frames. If the buffer pool contains any dirty pages, then these pages should be written back to disk before destroying the pool. It is an error to shutdown a buffer pool that has pinned pages.
  *
- * Parameters:
+ * Parameters: BM_BufferPool *const bm
  *
- * Return:
+ * Return: RC
  *
- * Author:
+ * Author: Xiaoliang Wu
  *
  * History:
  *      Date            Name                        Content
+ *      16/02/24        Xiaoliang Wu                Complete.
  *
 ***************************************************************/
 
 
 RC shutdownBufferPool(BM_BufferPool *const bm){
+    int *fixCounts;
+    int i;
+    RC RC_flag;
 
+    fixCounts = getFixCounts(bm);
+    for (i = 0; i < bm->numPages; ++i) {
+        if(*(fixCounts+i)){
+            return RC_SHUTDOWN_POOL_FAILED;
+        }
+    }
+
+    RC_flag = forceFlushPool(bm);
+    if(RC_flag != RC_OK){
+        return RC_flag;
+    }
+
+    free(bm->mgmtData);
+    free(bm->pageFile);
+    return RC_OK;
 }
 
 /***************************************************************
- * Function Name: 
+ * Function Name: forceFlushPool
  * 
- * Description:
+ * Description: forceFlushPool causes all dirty pages (with fix count 0) from the buffer pool to be written to disk.
  *
- * Parameters:
+ * Parameters: BM_BufferPool *const bm
  *
- * Return:
+ * Return: RC
  *
- * Author:
+ * Author: Xiaoliang Wu
  *
  * History:
  *      Date            Name                        Content
+ *      16/02/25        Xiaoliang Wu                Complete, forcepage need set dirty to 0.
  *
 ***************************************************************/
 
 RC forceFlushPool(BM_BufferPool *const bm){
+    bool *dirtyFlags;
+    int *fixCounts;
+    int i;
+    BM_PageHandle* page;
+    RC RC_flag;
 
+    dirtyFlags = getDirtyFlags(bm);
+    fixCounts = getFixCounts(bm);
+
+    for (i = 0; i < bm->numPages; ++i) {
+        if(*(dirtyFlags+i)){
+            if(*(fixCounts+i)){
+                continue;
+            }else{
+                page = ((bm->mgmtData)+i);
+                RC_flag = forcePage(bm, page);
+                if(RC_flag != RC_OK){
+                    return RC_flag;
+                }
+            }
+        }
+    }
+
+    return RC_OK;
 }
 
 // Buffer Manager Interface Access Pages

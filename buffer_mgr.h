@@ -20,20 +20,21 @@ typedef enum ReplacementStrategy {
 typedef int PageNumber;
 #define NO_PAGE -1
 
-typedef struct BM_BufferPool {
-  char *pageFile;
-  int numPages;
-  ReplacementStrategy strategy;
-  void *mgmtData; // use this one to store the bookkeeping info your buffer 
-                  // manager needs for a buffer pool
-} BM_BufferPool;
-
 typedef struct BM_PageHandle {
   PageNumber pageNum;
   char *data;
   bool dirty;
   int fixCounts;
 } BM_PageHandle;
+
+typedef struct BM_BufferPool {
+  char *pageFile;
+  int numPages;
+  ReplacementStrategy strategy;
+  BM_PageHandle *mgmtData; // use this one to store the bookkeeping info your buffer 
+                  // manager needs for a buffer pool
+} BM_BufferPool;
+
 
 // convenience macros
 #define MAKE_POOL()					\

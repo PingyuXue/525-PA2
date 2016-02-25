@@ -14,8 +14,9 @@ typedef int RC;
 #define RC_FILE_HANDLE_NOT_INIT 2
 #define RC_WRITE_FAILED 3
 #define RC_READ_NON_EXISTING_PAGE 4
-#define RC_CREATE_FILE_FAIL 5 //added by myself
-#define RC_GET_NUMBER_OF_BYTES_FAILED 6 //added by myself
+#define RC_CREATE_FILE_FAIL 5 //added by myself in assign 1
+#define RC_GET_NUMBER_OF_BYTES_FAILED 6 //added by myself in assign 1
+#define RC_SHUTDOWN_POOL_FAILED 7 //added by myself in assign 2
 
 #define RC_RM_COMPARE_VALUE_OF_DIFFERENT_DATATYPE 200
 #define RC_RM_EXPR_RESULT_IS_NOT_BOOLEAN 201
