@@ -95,6 +95,7 @@ RC initBufferPool(BM_BufferPool *const bm, const char *const pageFileName,
  * History:
  *      Date            Name                        Content
  *      16/02/24        Xiaoliang Wu                Complete.
+ *      16/02/26        Xiaoliang Wu                Free buffer in pages.
  *
 ***************************************************************/
 
@@ -116,6 +117,7 @@ RC shutdownBufferPool(BM_BufferPool *const bm){
         return RC_flag;
     }
 
+    freePagesBuffer(bm);
     free(bm->mgmtData);
     free(bm->pageFile);
     return RC_OK;
@@ -394,7 +396,7 @@ int getNumWriteIO (BM_BufferPool *const bm){
  * 
  * Description: decide use which frame to save data using FIFO.
  *
- * Parameters: BM_BufferPool bm
+ * Parameters: BM_BufferPool *bm
  *
  * Return: int
  *
@@ -405,7 +407,7 @@ int getNumWriteIO (BM_BufferPool *const bm){
  *
 ***************************************************************/
 
-int strategyFIFO(BM_BufferPool bm){
+int strategyFIFO(BM_BufferPool *bm){
 }
 
 /***************************************************************
@@ -413,7 +415,7 @@ int strategyFIFO(BM_BufferPool bm){
  * 
  * Description: decide use which frame to save data using LRU
  *
- * Parameters: BM_BufferPool bm
+ * Parameters: BM_BufferPool *bm
  *
  * Return: int
  *
@@ -424,7 +426,7 @@ int strategyFIFO(BM_BufferPool bm){
  *
 ***************************************************************/
 
-int strategyLRU(BM_BufferPool bm){
+int strategyLRU(BM_BufferPool *bm){
 }
 
 /***************************************************************
@@ -432,7 +434,7 @@ int strategyLRU(BM_BufferPool bm){
  * 
  * Description: decide use which frame to save data using LRU-k strategy.
  *
- * Parameters: BM_BufferPool bm
+ * Parameters: BM_BufferPool *bm
  *
  * Return: int
  *
@@ -443,7 +445,7 @@ int strategyLRU(BM_BufferPool bm){
  *
 ***************************************************************/
 
-int strategyLRU_k(BM_BufferPool bm){
+int strategyLRU_k(BM_BufferPool *bm){
 }
 
 /***************************************************************
@@ -451,7 +453,7 @@ int strategyLRU_k(BM_BufferPool bm){
  * 
  * Description: return an array that includes all pages strategyAttribute.
  *
- * Parameters: BM_BufferPool bm
+ * Parameters: BM_BufferPool *bm
  *
  * Return: int*
  *
@@ -462,24 +464,67 @@ int strategyLRU_k(BM_BufferPool bm){
  *
 ***************************************************************/
 
-int *getAttributionArray(BM_BufferPool bm){
+int *getAttributionArray(BM_BufferPool *bm){
 }
 
 /***************************************************************
- * Function Name: freePageHandles
+ * Function Name: freePagesBuffer
  * 
  * Description: free all pages in pool.
  *
- * Parameters: BM_BufferPool bm
+ * Parameters: BM_BufferPool *bm
  *
  * Return: RC
  *
- * Author:
+ * Author: Xiaoliang Wu 
  *
  * History:
  *      Date            Name                        Content
+ *      16/02/26        Xiaoliang Wu                Complete.
  *
 ***************************************************************/
 
-RC freePageHandles(BM_BufferPool bm){
+void freePagesBuffer(BM_BufferPool *bm){
+    int i;
+    for (i = 0; i < bm->numPages; ++i) {
+        free((bm->mgmtData+i)->data);
+        free((bm->mgmtData+i)->strategyAttribute);
+    }
+}
+
+/***************************************************************
+ * Function Name: updataAttribute
+ * 
+ * Description: modify the attribute about strategy. FIFO only use this function when page initial. LRU use this function when pinPage occurs.
+ *
+ * Parameters: BM_BufferPool *bm, BM_PageHandle *pageHandle
+ *
+ * Return: RC
+ *
+ * Author: Xiaoliang Wu 
+ *
+ * History:
+ *      Date            Name                        Content
+ *      16/02/26        Xiaoliang Wu                FIFO, LRU complete.
+ *
+***************************************************************/
+
+RC updataAttribute(BM_BufferPool *bm, BM_PageHandle *pageHandle){
+    // initial page strategy attribute assign buffer
+    if(pageHandle->strategyAttribute == NULL){
+
+        if(bm->strategy == RS_FIFO || bm->strategy == RS_LRU){
+            pageHandle->strategyAttribute = calloc(1, sizeof(int));
+        }
+
+    }
+
+    // assign number
+    if(bm->strategy == RS_FIFO || bm->strategy == RS_LRU){
+        int * attribute;
+        attribute = (int *)pageHandle->strategyAttribute;
+        *attribute = (bm->timer); //???
+        bm->timer++;
+        return RC_OK;
+    }
 }
