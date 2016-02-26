@@ -75,6 +75,7 @@ RC initBufferPool(BM_BufferPool *const bm, const char *const pageFileName,
     bm->mgmtData = buff;
     bm->numReadIO = 0;
     bm->numWriteIO = 0;
+    bm->timer = 0;
     return RC_OK;
 }
 

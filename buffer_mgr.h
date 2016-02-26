@@ -23,8 +23,9 @@ typedef int PageNumber;
 typedef struct BM_PageHandle {
   PageNumber pageNum;
   char *data;
-  bool dirty;
-  int fixCounts;
+  bool dirty; // mark whether this is a dirty page.
+  int fixCounts; // count how many clients are using this page.
+  void *strategyAttribute; // record attribution for strategy, like midify time or create time.
 } BM_PageHandle;
 
 typedef struct BM_BufferPool {
@@ -33,8 +34,9 @@ typedef struct BM_BufferPool {
   ReplacementStrategy strategy;
   BM_PageHandle *mgmtData; // use this one to store the bookkeeping info your buffer 
                   // manager needs for a buffer pool
-  int numReadIO;                
-  int numWriteIO;                
+  int numReadIO; // the number of read from page file.                
+  int numWriteIO; // the number of write from page file.                               
+  int timer; // initial is 0, use this timer to compare modify/create time.
 } BM_BufferPool;
 
 
