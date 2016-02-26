@@ -26,6 +26,7 @@ typedef struct BM_BufferPool {
                   // manager needs for a buffer pool
   int numReadIO;                
   int numWriteIO;                
+  int timer;
 } BM_BufferPool;
 
 typedef struct BM_PageHandle {
@@ -33,6 +34,7 @@ typedef struct BM_PageHandle {
   char *data;
   bool dirty;
   int fixCounts;
+  void* strategyAttribute;
 } BM_PageHandle;
 
  */
