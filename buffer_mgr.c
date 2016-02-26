@@ -26,6 +26,7 @@ typedef struct BM_BufferPool {
                   // manager needs for a buffer pool
   int numReadIO;                
   int numWriteIO;                
+  int timer;
 } BM_BufferPool;
 
 typedef struct BM_PageHandle {
@@ -33,6 +34,7 @@ typedef struct BM_PageHandle {
   char *data;
   bool dirty;
   int fixCounts;
+  void* strategyAttribute;
 } BM_PageHandle;
 
  */
@@ -75,6 +77,7 @@ RC initBufferPool(BM_BufferPool *const bm, const char *const pageFileName,
     bm->mgmtData = buff;
     bm->numReadIO = 0;
     bm->numWriteIO = 0;
+    bm->timer = 0;
     return RC_OK;
 }
 
