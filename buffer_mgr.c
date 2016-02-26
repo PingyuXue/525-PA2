@@ -346,3 +346,79 @@ int getNumReadIO (BM_BufferPool *const bm){
 int getNumWriteIO (BM_BufferPool *const bm){
 
 }
+
+/***************************************************************
+ * Function Name: 
+ * 
+ * Description:
+ *
+ * Parameters:
+ *
+ * Return:
+ *
+ * Author:
+ *
+ * History:
+ *      Date            Name                        Content
+ *
+***************************************************************/
+
+int strategyFIFO(BM_BufferPool bm){
+}
+
+/***************************************************************
+ * Function Name: 
+ * 
+ * Description:
+ *
+ * Parameters:
+ *
+ * Return:
+ *
+ * Author:
+ *
+ * History:
+ *      Date            Name                        Content
+ *
+***************************************************************/
+
+int strategyLRU(BM_BufferPool bm){
+}
+
+/***************************************************************
+ * Function Name: 
+ * 
+ * Description:
+ *
+ * Parameters:
+ *
+ * Return:
+ *
+ * Author:
+ *
+ * History:
+ *      Date            Name                        Content
+ *
+***************************************************************/
+
+int strategyLRU_k(BM_BufferPool bm){
+}
+
+/***************************************************************
+ * Function Name: 
+ * 
+ * Description:
+ *
+ * Parameters:
+ *
+ * Return:
+ *
+ * Author:
+ *
+ * History:
+ *      Date            Name                        Content
+ *
+***************************************************************/
+
+int *getAttributionArray(BM_BufferPool bm){
+}
