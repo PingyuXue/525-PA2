@@ -166,23 +166,65 @@ RC forceFlushPool(BM_BufferPool *const bm){
 // Buffer Manager Interface Access Pages
 
 /***************************************************************
- * Function Name: 
+ * Function Name: markDirty
  * 
- * Description:
+ * Description:mark a page as dirty
  *
- * Parameters:
+ * Parameters: BM_BufferPool *const bm, BM_PageHandle *const page
  *
- * Return:
+ * Return:RC
  *
- * Author:
+ * Author:Zhipeng Liu
  *
  * History:
  *      Date            Name                        Content
- *
+ * 02/25/16       Zhipeng Liu             complete
 ***************************************************************/
 
-RC markDirty (BM_BufferPool *const bm, BM_PageHandle *const page){
+RC markDirty (BM_BufferPool *const bm, BM_PageHandle *const page)
+{
+	int pnum;
+	for(int i=0;i<numPages;i++)
+	{
+		if((bm->mgmtData+i)->pageNum==page->pageNum)
+		{
+			pnum=i;
+			break;
+		}
+	}
+	(bm->mgmtData+pnum)->dirty=1;
+	return RC_OK;
+}
 
+/***************************************************************
+ * Function Name: unpinPage
+ * 
+ * Description:unpin a page indicate by "page"
+ *
+ * Parameters:BM_BufferPool *const bm, BM_PageHandle *const page
+ *
+ * Return:RC
+ *
+ * Author:Zhipeng Liu
+ *
+ * History:
+ *      Date            Name                        Content
+ *02/25/16       Zhipeng Liu             complete
+***************************************************************/
+
+RC unpinPage (BM_BufferPool *const bm, BM_PageHandle *const page)
+{
+	int pnum;
+	for(int i=0;i<numPages;i++)
+	{
+		if((bm->mgmtData+i)->pageNum==page->pageNum)
+		{
+			pnum=i;
+			break;
+		}
+	}
+	(bm->mgmtData+pnum)->fixCounts--;
+	return RC_OK;
 }
 
 /***************************************************************
@@ -201,49 +243,49 @@ RC markDirty (BM_BufferPool *const bm, BM_PageHandle *const page){
  *
 ***************************************************************/
 
-RC unpinPage (BM_BufferPool *const bm, BM_PageHandle *const page){
+RC forcePage (BM_BufferPool *const bm, BM_PageHandle *const page)
+{
 
 }
 
 /***************************************************************
- * Function Name: 
+ * Function Name: pinPage
  * 
- * Description:
+ * Description:pin a page, if the page does not exist in memory, read it from file
  *
- * Parameters:
+ * Parameters:BM_BufferPool *const bm, BM_PageHandle *const page, const PageNumber pageNum
  *
- * Return:
+ * Return:RC
  *
- * Author:
+ * Author:Zhipeng Liu
  *
  * History:
  *      Date            Name                        Content
- *
-***************************************************************/
-
-RC forcePage (BM_BufferPool *const bm, BM_PageHandle *const page){
-
-}
-
-/***************************************************************
- * Function Name: 
- * 
- * Description:
- *
- * Parameters:
- *
- * Return:
- *
- * Author:
- *
- * History:
- *      Date            Name                        Content
- *
+ *02/25/16       Zhipeng Liu             imcomplete, need to implement the replace page part
 ***************************************************************/
 
 RC pinPage (BM_BufferPool *const bm, BM_PageHandle *const page, 
-	    const PageNumber pageNum){
-
+	    const PageNumber pageNum)
+{
+	int pnum;
+	int flag=0;
+	for(int i=0;i<numPages;i++)
+	{
+		if((bm->mgmtData+i)->pageNum==pageNum)
+		{
+			pnum=i;
+			break;
+		}
+		if(i==numPages-1)
+			flag=1;
+	}
+	//if(flag==1)
+		//pnum=替换函数;
+	   //writeio++;
+	page=bm->mgmData
+	page->pageNum=pageNum;
+	page->fixCounts++;
+	return RC_OK;
 }
 
 // Statistics Interface
