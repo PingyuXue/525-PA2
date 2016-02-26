@@ -183,7 +183,7 @@ RC forceFlushPool(BM_BufferPool *const bm){
 RC markDirty (BM_BufferPool *const bm, BM_PageHandle *const page)
 {
 	int pnum;
-	for(int i=0;i<numPages;i++)
+	for(int i=0;i<bm->numPages;i++)
 	{
 		if((bm->mgmtData+i)->pageNum==page->pageNum)
 		{
@@ -214,7 +214,7 @@ RC markDirty (BM_BufferPool *const bm, BM_PageHandle *const page)
 RC unpinPage (BM_BufferPool *const bm, BM_PageHandle *const page)
 {
 	int pnum;
-	for(int i=0;i<numPages;i++)
+	for(int i=0;i<bm->numPages;i++)
 	{
 		if((bm->mgmtData+i)->pageNum==page->pageNum)
 		{
@@ -268,20 +268,21 @@ RC pinPage (BM_BufferPool *const bm, BM_PageHandle *const page,
 {
 	int pnum;
 	int flag=0;
-	for(int i=0;i<numPages;i++)
+	for(int i=0;i<bm->numPages;i++)
 	{
 		if((bm->mgmtData+i)->pageNum==pageNum)
 		{
 			pnum=i;
 			break;
 		}
-		if(i==numPages-1)
+		if(i==bm->numPages-1)
 			flag=1;
 	}
 	//if(flag==1)
 		//pnum=替换函数;
 	   //writeio++;
-	page=bm->mgmData
+	page->dirty=bm->mgmtData->dirty;
+	page->data=bm->mgmtData->data;
 	page->pageNum=pageNum;
 	page->fixCounts++;
 	return RC_OK;
