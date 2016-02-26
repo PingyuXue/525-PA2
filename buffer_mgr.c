@@ -394,13 +394,13 @@ int getNumWriteIO (BM_BufferPool *const bm){
 }
 
 /***************************************************************
- * Function Name: 
+ * Function Name: strategyFIFO
  * 
- * Description:
+ * Description: decide use which frame to save data using FIFO.
  *
- * Parameters:
+ * Parameters: BM_BufferPool bm
  *
- * Return:
+ * Return: int
  *
  * Author:
  *
@@ -413,13 +413,13 @@ int strategyFIFO(BM_BufferPool bm){
 }
 
 /***************************************************************
- * Function Name: 
+ * Function Name: strategyLRU
  * 
- * Description:
+ * Description: decide use which frame to save data using LRU
  *
- * Parameters:
+ * Parameters: BM_BufferPool bm
  *
- * Return:
+ * Return: int
  *
  * Author:
  *
@@ -432,13 +432,13 @@ int strategyLRU(BM_BufferPool bm){
 }
 
 /***************************************************************
- * Function Name: 
+ * Function Name: strategyLRU_k
  * 
- * Description:
+ * Description: decide use which frame to save data using LRU-k strategy.
  *
- * Parameters:
+ * Parameters: BM_BufferPool bm
  *
- * Return:
+ * Return: int
  *
  * Author:
  *
@@ -451,13 +451,13 @@ int strategyLRU_k(BM_BufferPool bm){
 }
 
 /***************************************************************
- * Function Name: 
+ * Function Name: getAttributionArray
  * 
- * Description:
+ * Description: return an array that includes all pages strategyAttribute.
  *
- * Parameters:
+ * Parameters: BM_BufferPool bm
  *
- * Return:
+ * Return: int*
  *
  * Author:
  *
@@ -467,4 +467,23 @@ int strategyLRU_k(BM_BufferPool bm){
 ***************************************************************/
 
 int *getAttributionArray(BM_BufferPool bm){
+}
+
+/***************************************************************
+ * Function Name: freePageHandles
+ * 
+ * Description: free all pages in pool.
+ *
+ * Parameters: BM_BufferPool bm
+ *
+ * Return: RC
+ *
+ * Author:
+ *
+ * History:
+ *      Date            Name                        Content
+ *
+***************************************************************/
+
+RC freePageHandles(BM_BufferPool bm){
 }
