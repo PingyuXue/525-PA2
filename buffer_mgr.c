@@ -180,21 +180,19 @@ RC forceFlushPool(BM_BufferPool *const bm){
  *
  * History:
  *      Date            Name                        Content
- * 02/25/16       Zhipeng Liu             complete
+ *      02/25/16        Zhipeng Liu                 complete
 ***************************************************************/
 
 RC markDirty (BM_BufferPool *const bm, BM_PageHandle *const page)
 {
-	int pnum;
 	for(int i=0;i<bm->numPages;i++)
 	{
 		if((bm->mgmtData+i)->pageNum==page->pageNum)
 		{
-			pnum=i;
+	        (bm->mgmtData+i)->dirty=1;
 			break;
 		}
 	}
-	(bm->mgmtData+pnum)->dirty=1;
 	return RC_OK;
 }
 
@@ -211,21 +209,19 @@ RC markDirty (BM_BufferPool *const bm, BM_PageHandle *const page)
  *
  * History:
  *      Date            Name                        Content
- *02/25/16       Zhipeng Liu             complete
+ *      02/25/16        Zhipeng Liu                 complete
 ***************************************************************/
 
 RC unpinPage (BM_BufferPool *const bm, BM_PageHandle *const page)
 {
-	int pnum;
 	for(int i=0;i<bm->numPages;i++)
 	{
 		if((bm->mgmtData+i)->pageNum==page->pageNum)
 		{
-			pnum=i;
+	        (bm->mgmtData+i)->fixCounts--;
 			break;
 		}
 	}
-	(bm->mgmtData+pnum)->fixCounts--;
 	return RC_OK;
 }
 
