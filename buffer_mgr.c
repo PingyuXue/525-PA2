@@ -331,7 +331,11 @@ PageNumber *getFrameContents (BM_BufferPool *const bm){
     BM_PageHandle *handle = bm->mgmtData;
     
     for(int i=0; i< bm->numPages; i++){
-         arr[i] = (handle+i)->pageNum; 
+        if(pg->data == NULL){
+            arr[i] = NO_PAGE;
+        } else {
+            arr[i] = (handle+i)->pageNum; 
+        }
     }
     return arr;
 }
@@ -357,7 +361,7 @@ bool *getDirtyFlags (BM_BufferPool *const bm){
     BM_PageHandle *handle = bm->mgmtData;
     
     for(int i=0; i< bm->numPages; i++){
-         arr[i] = (handle+i)->dirty; 
+        arr[i] = (handle+i)->dirty; 
     }
     return arr;
 }
