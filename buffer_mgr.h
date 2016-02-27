@@ -25,7 +25,7 @@ typedef struct BM_PageHandle {
   char *data;
   bool dirty; // mark whether this is a dirty page.
   int fixCounts; // count how many clients are using this page.
-  void *strategyAttribute; // record attribution for strategy, like midify time or create time.
+  int *strategyAttribute; // record attribution for strategy, like midify time or create time.
 } BM_PageHandle;
 
 typedef struct BM_BufferPool {
