@@ -69,7 +69,7 @@ int getNumReadIO (BM_BufferPool *const bm);
 int getNumWriteIO (BM_BufferPool *const bm);
 
 // Added by myself
-int strategyFIFO(BM_BufferPool *bm);
+int strategyFIFOandLRU(BM_BufferPool *bm);
 int strategyLRU(BM_BufferPool *bm);
 int strategyLRU_k(BM_BufferPool *bm);
 int *getAttributionArray(BM_BufferPool *bm);

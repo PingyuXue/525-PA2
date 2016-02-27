@@ -109,12 +109,14 @@ RC shutdownBufferPool(BM_BufferPool *const bm){
     fixCounts = getFixCounts(bm);
     for (i = 0; i < bm->numPages; ++i) {
         if(*(fixCounts+i)){
+	        free(fixCounts);
             return RC_SHUTDOWN_POOL_FAILED;
         }
     }
 
     RC_flag = forceFlushPool(bm);
     if(RC_flag != RC_OK){
+	    free(fixCounts);
         return RC_flag;
     }
 
@@ -295,7 +297,7 @@ RC pinPage (BM_BufferPool *const bm, BM_PageHandle *const page,
 	}
 	if(flag==1)
 	{
-	   pnum=strategyFIFO(bm);
+	   pnum=strategyFIFOandLRU(bm);
 	   updataAttribute(bm, page);
 	   (bm->numReadIO)++;
 	}
@@ -427,7 +429,7 @@ int getNumWriteIO (BM_BufferPool *const bm){
 }
 
 /***************************************************************
- * Function Name: strategyFIFO
+ * Function Name: strategyFIFOandLRU
  * 
  * Description: decide use which frame to save data using FIFO.
  *
@@ -435,14 +437,15 @@ int getNumWriteIO (BM_BufferPool *const bm){
  *
  * Return: int
  *
- * Author:
+ * Author: Xiaoliang Wu
  *
  * History:
  *      Date            Name                        Content
+ *      16/02/27        Xiaoliang Wu                Complete
  *
 ***************************************************************/
 
-int strategyFIFO(BM_BufferPool *bm){
+int strategyFIFOandLRU(BM_BufferPool *bm){
     int * attributes;
     int * fixCounts;
     int i;
@@ -453,6 +456,7 @@ int strategyFIFO(BM_BufferPool *bm){
 
     min = bm->timer;
     abortPage = -1;
+
     for (i = 0; i < bm->numPages; ++i) {
         if(fixCounts+i != 0) continue;
 
@@ -462,26 +466,13 @@ int strategyFIFO(BM_BufferPool *bm){
         }
     }
 
+    if((bm->timer) > 32000){
+        (bm->timer) -= min;
+        for (i = 0; i < bm->numPages; ++i) {
+            *(bm->mgmtData->strategyAttribute) -= min;
+        }
+    }
     return abortPage;
-}
-
-/***************************************************************
- * Function Name: strategyLRU
- * 
- * Description: decide use which frame to save data using LRU
- *
- * Parameters: BM_BufferPool *bm
- *
- * Return: int
- *
- * Author:
- *
- * History:
- *      Date            Name                        Content
- *
-***************************************************************/
-
-int strategyLRU(BM_BufferPool *bm){
 }
 
 /***************************************************************
