@@ -96,6 +96,7 @@ RC initBufferPool(BM_BufferPool *const bm, const char *const pageFileName,
  *      Date            Name                        Content
  *      16/02/24        Xiaoliang Wu                Complete.
  *      16/02/26        Xiaoliang Wu                Free buffer in pages.
+ *		16/02/27		Xincheng Yang				Free fixCounts.
  *
 ***************************************************************/
 
@@ -118,6 +119,7 @@ RC shutdownBufferPool(BM_BufferPool *const bm){
     }
 
     freePagesBuffer(bm);
+	free(fixCounts);
     free(bm->mgmtData);
     free(bm->pageFile);
     return RC_OK;
@@ -137,6 +139,7 @@ RC shutdownBufferPool(BM_BufferPool *const bm){
  * History:
  *      Date            Name                        Content
  *      16/02/25        Xiaoliang Wu                Complete, forcepage need set dirty to 0.
+ *		16/02/27		Xincheng Yang				free fixCounts and dirtyFlags.
  *
 ***************************************************************/
 
@@ -164,6 +167,8 @@ RC forceFlushPool(BM_BufferPool *const bm){
         }
     }
 
+	free(dirtyFlags);
+	free(fixCounts);
     return RC_OK;
 }
 
@@ -292,103 +297,121 @@ RC pinPage (BM_BufferPool *const bm, BM_PageHandle *const page,
 // Statistics Interface
 
 /***************************************************************
- * Function Name: 
+ * Function Name: getFrameContents 
  * 
- * Description:
+ * Description: Returns an array of PageNumbers where the ith element is the number of the page stored in the ith page frame
  *
- * Parameters:
+ * Parameters: BM_BufferPool *const bm
  *
- * Return:
+ * Return: PageNumber *
  *
- * Author:
+ * Author: Xincheng Yang
  *
  * History:
  *      Date            Name                        Content
+ *   2016/2/27		Xincheng Yang             first time to implement the function
  *
 ***************************************************************/
-
 PageNumber *getFrameContents (BM_BufferPool *const bm){
-
+    PageNumber *arr = (PageNumber*)malloc(bm->numPages * sizeof(PageNumber));
+    BM_PageHandle *handle = bm->mgmtData;
+    
+    for(int i=0; i< bm->numPages; i++){
+         arr[i] = (handle+i)->pageNum; 
+    }
+    return arr;
 }
 
 /***************************************************************
- * Function Name: 
+ * Function Name: getDirtyFlags 
  * 
- * Description:
+ * Description: Returns an array of bools where the ith element is TRUE if the page stored in the ith page frame is dirty
  *
- * Parameters:
+ * Parameters: BM_BufferPool *const bm
  *
- * Return:
+ * Return: bool *
  *
- * Author:
+ * Author: Xincheng Yang
  *
  * History:
  *      Date            Name                        Content
+ *   2016/2/27		Xincheng Yang             first time to implement the function
  *
 ***************************************************************/
-
 bool *getDirtyFlags (BM_BufferPool *const bm){
-
+    bool *arr = (bool*)malloc(bm->numPages * sizeof(bool));
+    BM_PageHandle *handle = bm->mgmtData;
+    
+    for(int i=0; i< bm->numPages; i++){
+         arr[i] = (handle+i)->dirty; 
+    }
+    return arr;
 }
 
 /***************************************************************
- * Function Name: 
+ * Function Name: getFixCounts 
  * 
- * Description:
+ * Description: Returns an array of ints where the ith element is the fix count of the page stored in the ith page frame
  *
- * Parameters:
+ * Parameters: BM_BufferPool *const bm
  *
- * Return:
+ * Return: int *
  *
- * Author:
+ * Author: Xincheng Yang
  *
  * History:
  *      Date            Name                        Content
+ *   2016/2/27		Xincheng Yang             first time to implement the function
  *
 ***************************************************************/
-
 int *getFixCounts (BM_BufferPool *const bm){
-
+    int *arr = (int*)malloc(bm->numPages * sizeof(int));
+    BM_PageHandle *handle = bm->mgmtData;
+    
+    for(int i=0; i< bm->numPages; i++){
+         arr[i] = (handle+i)->fixCounts; 
+    }
+    return arr;
 }
 
 /***************************************************************
- * Function Name: 
+ * Function Name: getNumReadIO 
  * 
- * Description:
+ * Description: Returns an array of ints where the ith element is the fix count of the page stored in the ith page frame
  *
- * Parameters:
+ * Parameters: BM_BufferPool *const bm
  *
- * Return:
+ * Return: int 
  *
- * Author:
+ * Author: Xincheng Yang
  *
  * History:
  *      Date            Name                        Content
+ *   2016/2/27		Xincheng Yang             first time to implement the function
  *
 ***************************************************************/
-
 int getNumReadIO (BM_BufferPool *const bm){
-
+	return bm->numReadIO;
 }
 
 /***************************************************************
- * Function Name: 
+ * Function Name: getNumWriteIO 
  * 
- * Description:
+ * Description: Returns an array of ints where the ith element is the fix count of the page stored in the ith page frame
  *
- * Parameters:
+ * Parameters: BM_BufferPool *const bm
  *
- * Return:
+ * Return: int 
  *
- * Author:
+ * Author: Xincheng Yang
  *
  * History:
  *      Date            Name                        Content
+ *   2016/2/27		Xincheng Yang             first time to implement the function
  *
 ***************************************************************/
-
 int getNumWriteIO (BM_BufferPool *const bm){
-
+	return bm->numWriteIO;
 }
 
 /***************************************************************
