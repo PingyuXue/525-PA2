@@ -161,6 +161,8 @@ RC forceFlushPool(BM_BufferPool *const bm){
                 page = ((bm->mgmtData)+i);
                 RC_flag = forcePage(bm, page);
                 if(RC_flag != RC_OK){
+	                free(dirtyFlags);
+	                free(fixCounts);
                     return RC_flag;
                 }
             }
@@ -431,6 +433,26 @@ int getNumWriteIO (BM_BufferPool *const bm){
 ***************************************************************/
 
 int strategyFIFO(BM_BufferPool *bm){
+    int * attributes;
+    int * fixCounts;
+    int i;
+    int min, abortPage;
+
+    attributes = (int *)getAttributionArray(bm);
+    fixCounts = getFixCounts(bm);
+
+    min = bm->timer;
+    abortPage = -1;
+    for (i = 0; i < bm->numPages; ++i) {
+        if(fixCounts+i != 0) continue;
+
+        if(min > (*(attributes+i))){
+            abortPage = i;
+            min = (*(attributes+i));
+        }
+    }
+
+    return abortPage;
 }
 
 /***************************************************************
@@ -480,14 +502,25 @@ int strategyLRU_k(BM_BufferPool *bm){
  *
  * Return: int*
  *
- * Author:
+ * Author: Xiaoliang Wu
  *
  * History:
  *      Date            Name                        Content
+ *      16/02/27        Xiaoliang Wu                Complete.
  *
 ***************************************************************/
 
 int *getAttributionArray(BM_BufferPool *bm){
+    int *attributes;
+    int *flag;
+    int i;
+
+    attributes = (int *)calloc(bm->numPages, sizeof((bm->mgmtData)->strategyAttribute));
+    for (i = 0; i < bm->numPages; ++i) {
+        flag = attributes + i;
+        *flag = *((bm->mgmtData+i)->strategyAttribute);
+    }
+    return attributes;
 }
 
 /***************************************************************
@@ -546,8 +579,8 @@ RC updataAttribute(BM_BufferPool *bm, BM_PageHandle *pageHandle){
     if(bm->strategy == RS_FIFO || bm->strategy == RS_LRU){
         int * attribute;
         attribute = (int *)pageHandle->strategyAttribute;
-        *attribute = (bm->timer); //???
-        bm->timer++;
+        *attribute = (bm->timer); 
+        (bm->timer)++;
         return RC_OK;
     }
 
