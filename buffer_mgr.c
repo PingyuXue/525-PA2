@@ -250,7 +250,13 @@ RC unpinPage (BM_BufferPool *const bm, BM_PageHandle *const page)
 
 RC forcePage (BM_BufferPool *const bm, BM_PageHandle *const page)
 {
-
+	FILE *fp;
+	fp=fopen(*(bm->pageFile),"rb+");
+	fseek(fp,page->pageNum,SEEK_SET);
+	fwrite(page->data,PAGE_SIZE,1,fp);
+	numWriteIO++;
+	page->dirty=0;
+	return RC_OK;
 }
 
 /***************************************************************
@@ -284,9 +290,12 @@ RC pinPage (BM_BufferPool *const bm, BM_PageHandle *const page,
 		if(i==bm->numPages-1)
 			flag=1;
 	}
-	//if(flag==1)
-		//pnum=替换函数;
-	   //writeio++;
+	if(flag==1)
+	{
+	   pnum=替换函数;
+	   updataAttribute(bm, page);
+	   numReadIO++;
+	}
 	page->dirty=bm->mgmtData->dirty;
 	page->data=bm->mgmtData->data;
 	page->pageNum=pageNum;
