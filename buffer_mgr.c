@@ -331,7 +331,7 @@ PageNumber *getFrameContents (BM_BufferPool *const bm){
     BM_PageHandle *handle = bm->mgmtData;
     
     for(int i=0; i< bm->numPages; i++){
-        if(pg->data == NULL){
+        if(handle->data == NULL){
             arr[i] = NO_PAGE;
         } else {
             arr[i] = (handle+i)->pageNum; 
