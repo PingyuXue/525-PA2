@@ -527,4 +527,6 @@ RC updataAttribute(BM_BufferPool *bm, BM_PageHandle *pageHandle){
         bm->timer++;
         return RC_OK;
     }
+
+    return RC_STRATEGY_NOT_FOUND;
 }
