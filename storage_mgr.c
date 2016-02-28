@@ -77,7 +77,7 @@ extern RC ensureCapacity (int numberOfPages, SM_FileHandle *fHandle);
 void initStorageManager(void){
 	
    
-	printf("--------Initialzing the StorageManager----------");   // to let user know enter the StorageManager
+	printf("--------Initialzing the StorageManager--------------\n");   // to let user know enter the StorageManager
 	printf("--------the StorageManager version is 1.00---------- \n");
 	//return;
 }
