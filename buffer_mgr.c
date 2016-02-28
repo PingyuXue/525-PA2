@@ -203,6 +203,7 @@ RC forceFlushPool(BM_BufferPool *const bm){
 
 RC markDirty (BM_BufferPool *const bm, BM_PageHandle *const page)
 {
+	printf("\n3\n");
 	for(int i=0;i<(bm->numPages);i++)
 	{
 		if((bm->mgmtData+i)->pageNum==page->pageNum)
@@ -293,6 +294,7 @@ RC pinPage (BM_BufferPool *const bm, BM_PageHandle *const page,
 	int pnum;
 	int flag=0;
 
+	printf("\n1\n");
 	for(int i=0;i<bm->numPages;i++)
 	{
 		if((bm->mgmtData+i)->data==NULL)
@@ -313,8 +315,8 @@ RC pinPage (BM_BufferPool *const bm, BM_PageHandle *const page,
 			flag=1;
 			if(bm->strategy==RS_FIFO)
 				pnum=strategyFIFOandLRU(bm);
-			if(bm->strategy==RS_LRU)
-				pnum=strategyLRU(bm);
+			//if(bm->strategy==RS_LRU)
+			//	pnum=strategyLRU(bm);
 		}
 	}
 	if(flag==1)
@@ -339,9 +341,10 @@ RC pinPage (BM_BufferPool *const bm, BM_PageHandle *const page,
 		page->fixCounts=(bm->mgmtData+pnum)->fixCounts;
 		page->pageNum=pageNum;
 		page->dirty=(bm->mgmtData+pnum)->dirty;
-		if(bm->strategy==RS_LRU)
-			updataAttribute(bm, bm->mgmtData+pnum);
+		//if(bm->strategy==RS_LRU)
+		//	updataAttribute(bm, bm->mgmtData+pnum);
 	}
+	printf("\n2\n");
 	return RC_OK;
 }
 
@@ -368,11 +371,7 @@ PageNumber *getFrameContents (BM_BufferPool *const bm){
     BM_PageHandle *handle = bm->mgmtData;
     
     for(int i=0; i< bm->numPages; i++){
-<<<<<<< HEAD
         if((handle+i)->data == NULL){
-=======
-        if(handle->data == NULL){
->>>>>>> 92bdd7c0828d451d1c8eb06b0752fc56ff1aca64
             arr[i] = NO_PAGE;
         } else {
             arr[i] = (handle+i)->pageNum; 
