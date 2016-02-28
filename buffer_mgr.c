@@ -294,36 +294,40 @@ RC pinPage (BM_BufferPool *const bm, BM_PageHandle *const page,
 	int pnum;
 	int flag=0;
 
-	printf("\n1\n");
+	printf("1\n");
 	for(int i=0;i<bm->numPages;i++)
 	{
 		if((bm->mgmtData+i)->data==NULL)
 		{
-			page->data=calloc(PAGE_SIZE, sizeof(char));
+			printf("1.1\n");
+			(bm->mgmtData+i)->data=(char*)calloc(PAGE_SIZE, sizeof(char));
 			pnum=i;
 			flag=1;
 			break;
 		}
 		if((bm->mgmtData+i)->pageNum==pageNum)
 		{
+			printf("1.2\n");
 			pnum=i;
 			flag=2;
 			break;
 		}
 		if(i==bm->numPages-1)
 		{
+			
 			flag=1;
 			if(bm->strategy==RS_FIFO)
 				pnum=strategyFIFOandLRU(bm);
 			//if(bm->strategy==RS_LRU)
 			//	pnum=strategyLRU(bm);
+			printf("pnum=%d\n",pnum);
 		}
 	}
 	if(flag==1)
 	{
 		FILE* fp;
 		fp=fopen(bm->pageFile, "r");
-		fseek(fp,(page->pageNum)*PAGE_SIZE,SEEK_SET);
+		fseek(fp,pageNum*PAGE_SIZE,SEEK_SET);
 		fread((bm->mgmtData+pnum)->data,sizeof(char),PAGE_SIZE,fp);
 		page->data=(bm->mgmtData+pnum)->data;
 		bm->numReadIO++;
@@ -344,7 +348,7 @@ RC pinPage (BM_BufferPool *const bm, BM_PageHandle *const page,
 		//if(bm->strategy==RS_LRU)
 		//	updataAttribute(bm, bm->mgmtData+pnum);
 	}
-	printf("\n2\n");
+	printf("2\n");
 	return RC_OK;
 }
 
