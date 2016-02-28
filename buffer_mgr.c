@@ -56,7 +56,7 @@ typedef struct BM_PageHandle {
  * History:
  *      Date            Name                        Content
  *      16/02/24        Xiaoliang Wu                Not init pageHandle.
- *
+ *	02/27/16        Zhipeng Liu		    add some init
 ***************************************************************/
 
 RC initBufferPool(BM_BufferPool *const bm, const char *const pageFileName, 
@@ -75,6 +75,13 @@ RC initBufferPool(BM_BufferPool *const bm, const char *const pageFileName,
     bm->strategy = strategy;
     BM_PageHandle* buff = (BM_PageHandle *)calloc(numPages, sizeof(BM_PageHandle));
     bm->mgmtData = buff;
+    for(int i=0;i<numPages;i++)
+    {
+	(bm->mgmtData+i)->dirty=0;
+	(bm->mgmtData+i)->fixCounts=0;
+	(bm->mgmtData+i)->data=NULL;
+	(bm->mgmtData+i)->pageNum=-1;
+    }
     bm->numReadIO = 0;
     bm->numWriteIO = 0;
     bm->timer = 0;
@@ -196,11 +203,11 @@ RC forceFlushPool(BM_BufferPool *const bm){
 
 RC markDirty (BM_BufferPool *const bm, BM_PageHandle *const page)
 {
-	for(int i=0;i<bm->numPages;i++)
+	for(int i=0;i<(bm->numPages);i++)
 	{
 		if((bm->mgmtData+i)->pageNum==page->pageNum)
 		{
-	        (bm->mgmtData+i)->dirty=1;
+	        	(bm->mgmtData+i)->dirty=1;
 			break;
 		}
 	}
@@ -237,19 +244,19 @@ RC unpinPage (BM_BufferPool *const bm, BM_PageHandle *const page)
 }
 
 /***************************************************************
- * Function Name: 
+ * Function Name: forcePage
  * 
- * Description:
+ * Description:write the current content of the page back to the page file on disk
  *
- * Parameters:
+ * Parameters:BM_BufferPool *const bm, BM_PageHandle *const page
  *
- * Return:
+ * Return:RC
  *
- * Author:
+ * Author:Zhipeng Liu
  *
  * History:
  *      Date            Name                        Content
- *
+ *	02/16/2016	Zhipeng Liu		   finish the function
 ***************************************************************/
 
 RC forcePage (BM_BufferPool *const bm, BM_PageHandle *const page)
@@ -257,7 +264,7 @@ RC forcePage (BM_BufferPool *const bm, BM_PageHandle *const page)
 	FILE *fp;
 	
 	fp=fopen(bm->pageFile,"rb+");
-	fseek(fp,page->pageNum,SEEK_SET);
+	fseek(fp,(page->pageNum)*PAGE_SIZE,SEEK_SET);
 	fwrite(page->data,PAGE_SIZE,1,fp);
 	(bm->numWriteIO)++;
 	page->dirty=0;
@@ -277,7 +284,7 @@ RC forcePage (BM_BufferPool *const bm, BM_PageHandle *const page)
  *
  * History:
  *      Date            Name                        Content
- *02/25/16       Zhipeng Liu             imcomplete, need to implement the replace page part
+ *02/25/16       Zhipng Liu             imcomplete, need to implement the replace page part
 ***************************************************************/
 
 RC pinPage (BM_BufferPool *const bm, BM_PageHandle *const page, 
@@ -285,26 +292,56 @@ RC pinPage (BM_BufferPool *const bm, BM_PageHandle *const page,
 {
 	int pnum;
 	int flag=0;
+
 	for(int i=0;i<bm->numPages;i++)
 	{
+		if((bm->mgmtData+i)->data==NULL)
+		{
+			page->data=calloc(PAGE_SIZE, sizeof(char));
+			pnum=i;
+			flag=1;
+			break;
+		}
 		if((bm->mgmtData+i)->pageNum==pageNum)
 		{
 			pnum=i;
+			flag=2;
 			break;
 		}
 		if(i==bm->numPages-1)
+		{
 			flag=1;
+			if(bm->strategy==RS_FIFO)
+				pnum=strategyFIFOandLRU(bm);
+			if(bm->strategy==RS_LRU)
+				pnum=strategyLRU(bm);
+		}
 	}
 	if(flag==1)
 	{
-	   pnum=strategyFIFOandLRU(bm);
-	   updataAttribute(bm, page);
-	   (bm->numReadIO)++;
+		FILE* fp;
+		fp=fopen(bm->pageFile, "r");
+		fseek(fp,(page->pageNum)*PAGE_SIZE,SEEK_SET);
+		fread((bm->mgmtData+pnum)->data,sizeof(char),PAGE_SIZE,fp);
+		page->data=(bm->mgmtData+pnum)->data;
+		bm->numReadIO++;
+		((bm->mgmtData+pnum)->fixCounts)++;
+		(bm->mgmtData+pnum)->pageNum=pageNum;
+		page->fixCounts=(bm->mgmtData+pnum)->fixCounts;
+		page->pageNum=pageNum;
+		page->dirty=(bm->mgmtData+pnum)->dirty;
+		updataAttribute(bm, bm->mgmtData+pnum);
 	}
-	page->dirty=bm->mgmtData->dirty;
-	page->data=bm->mgmtData->data;
-	page->pageNum=pageNum;
-	page->fixCounts++;
+	if(flag==2)
+	{
+		page->data=(bm->mgmtData+pnum)->data;
+		((bm->mgmtData+pnum)->fixCounts)++;
+		page->fixCounts=(bm->mgmtData+pnum)->fixCounts;
+		page->pageNum=pageNum;
+		page->dirty=(bm->mgmtData+pnum)->dirty;
+		if(bm->strategy==RS_LRU)
+			updataAttribute(bm, bm->mgmtData+pnum);
+	}
 	return RC_OK;
 }
 
@@ -331,7 +368,7 @@ PageNumber *getFrameContents (BM_BufferPool *const bm){
     BM_PageHandle *handle = bm->mgmtData;
     
     for(int i=0; i< bm->numPages; i++){
-        if(pg->data == NULL){
+        if((handle+i)->data == NULL){
             arr[i] = NO_PAGE;
         } else {
             arr[i] = (handle+i)->pageNum; 
