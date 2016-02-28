@@ -506,9 +506,9 @@ int strategyFIFOandLRU(BM_BufferPool *bm){
     abortPage = -1;
 
     for (i = 0; i < bm->numPages; ++i) {
-        if(fixCounts+i != 0) continue;
+        if(*(fixCounts+i) != 0) continue;
 
-        if(min > (*(attributes+i))){
+        if(min >= (*(attributes+i))){
             abortPage = i;
             min = (*(attributes+i));
         }
