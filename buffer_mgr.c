@@ -269,6 +269,7 @@ RC forcePage (BM_BufferPool *const bm, BM_PageHandle *const page)
 	fwrite(page->data,PAGE_SIZE,1,fp);
 	(bm->numWriteIO)++;
 	page->dirty=0;
+	fclose(fp);
 	return RC_OK;
 }
 
@@ -337,6 +338,7 @@ RC pinPage (BM_BufferPool *const bm, BM_PageHandle *const page,
 		page->pageNum=pageNum;
 		page->dirty=(bm->mgmtData+pnum)->dirty;
 		updataAttribute(bm, bm->mgmtData+pnum);
+		fclose(fp);
 	}
 	if(flag==2)
 	{
