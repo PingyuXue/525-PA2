@@ -237,7 +237,10 @@ RC unpinPage (BM_BufferPool *const bm, BM_PageHandle *const page)
 		{
 	        	(bm->mgmtData+i)->fixCounts--;
 			if((bm->mgmtData+i)->fixCounts==0&&(bm->mgmtData+i)->dirty==1)
+			{
 				forcePage(bm,page);
+				(bm->mgmtData+i)->dirty=0;
+			}
 			break;
 		}
 	}
@@ -270,6 +273,8 @@ RC forcePage (BM_BufferPool *const bm, BM_PageHandle *const page)
 	(bm->numWriteIO)++;
 	page->dirty=0;
 	fclose(fp);
+//	free(page->data);
+	page->pageNum=-1;
 	return RC_OK;
 }
 
@@ -297,7 +302,7 @@ RC pinPage (BM_BufferPool *const bm, BM_PageHandle *const page,
 
 	for(int i=0;i<bm->numPages;i++)
 	{
-		if((bm->mgmtData+i)->data==NULL)
+		if((bm->mgmtData+i)->pageNum==-1)
 		{
 			(bm->mgmtData+i)->data=(char*)calloc(PAGE_SIZE, sizeof(char));
 			pnum=i;
