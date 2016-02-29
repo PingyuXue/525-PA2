@@ -235,7 +235,9 @@ RC unpinPage (BM_BufferPool *const bm, BM_PageHandle *const page)
 	{
 		if((bm->mgmtData+i)->pageNum==page->pageNum)
 		{
-	        (bm->mgmtData+i)->fixCounts--;
+	        	(bm->mgmtData+i)->fixCounts--;
+			if((bm->mgmtData+i)->fixCounts==0&&(bm->mgmtData+i)->dirty==1)
+				forcePage(bm,page);
 			break;
 		}
 	}
