@@ -273,7 +273,7 @@ RC forcePage (BM_BufferPool *const bm, BM_PageHandle *const page)
 	page->dirty=0;
 	fclose(fp);
 //	free(page->data);
-	page->dirty=0;
+//	page->dirty=0;
 	page->pageNum=-1;
 	return RC_OK;
 }
