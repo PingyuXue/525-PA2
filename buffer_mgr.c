@@ -336,7 +336,6 @@ RC pinPage (BM_BufferPool *const bm, BM_PageHandle *const page,
 			if(bm->strategy==RS_FIFO)
 			{
 				pnum=strategyFIFOandLRU(bm);
-				printf("replace:   %d\n",pnum);
 				if((bm->mgmtData+pnum)->dirty)
 					forcePage (bm,bm->mgmtData+pnum);
 			}
