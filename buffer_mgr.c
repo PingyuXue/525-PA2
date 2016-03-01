@@ -161,8 +161,9 @@ RC forceFlushPool(BM_BufferPool *const bm){
     dirtyFlags = getDirtyFlags(bm);
     fixCounts = getFixCounts(bm);
 
-    for (i = 0; i < bm->numPages; ++i) {
+/*    for (i = 0; i < bm->numPages; ++i) {
         if(*(dirtyFlags+i)){
+//printf("%s\n",*(dirtyFlags)?"true":"false");
             if(*(fixCounts+i)){
                 continue;
             }else{
@@ -175,7 +176,12 @@ RC forceFlushPool(BM_BufferPool *const bm){
                 }
             }
         }
-    }
+    }*/
+	for (i = 0; i < bm->numPages; ++i) 
+	{
+		if(*(dirtyFlags+i))
+			((bm->mgmtData)+i)->dirty=0;
+	}
 
 	free(dirtyFlags);
 	free(fixCounts);
@@ -206,6 +212,7 @@ RC markDirty (BM_BufferPool *const bm, BM_PageHandle *const page)
 	{
 		if((bm->mgmtData+i)->pageNum==page->pageNum)
 		{
+			page->dirty=1;
 	        	(bm->mgmtData+i)->dirty=1;
 			break;
 		}
@@ -236,10 +243,11 @@ RC unpinPage (BM_BufferPool *const bm, BM_PageHandle *const page)
 		if((bm->mgmtData+i)->pageNum==page->pageNum)
 		{
 	        	(bm->mgmtData+i)->fixCounts--;
-			if((bm->mgmtData+i)->fixCounts==0&&(bm->mgmtData+i)->dirty==1)
+//			page->fixCounts--;
+			if((bm->mgmtData+i)->dirty==1&&(bm->mgmtData+i)->fixCounts==0)
 			{
 				forcePage(bm,page);
-			}
+			}			
 			break;
 		}
 	}
@@ -266,15 +274,25 @@ RC forcePage (BM_BufferPool *const bm, BM_PageHandle *const page)
 {
 	FILE *fp;
 	
+
+	
 	fp=fopen(bm->pageFile,"rb+");
 	fseek(fp,(page->pageNum)*PAGE_SIZE,SEEK_SET);
 	fwrite(page->data,PAGE_SIZE,1,fp);
 	(bm->numWriteIO)++;
-	page->dirty=0;
 	fclose(fp);
-//	free(page->data);
-//	page->dirty=0;
-	page->pageNum=-1;
+//		free(page->data);
+	for(int i=0;i<bm->numPages;i++)
+	{
+		if((bm->mgmtData+i)->pageNum==page->pageNum)
+		{
+//			(bm->mgmtData+i)->dirty=0;
+//			(bm->mgmtData+i)->pageNum=-1;
+			break;
+		}
+	}
+page->dirty=0;
+//page->pageNum=-1;
 	return RC_OK;
 }
 
@@ -338,6 +356,7 @@ RC pinPage (BM_BufferPool *const bm, BM_PageHandle *const page,
 		page->fixCounts=(bm->mgmtData+pnum)->fixCounts;
 		page->pageNum=pageNum;
 		page->dirty=(bm->mgmtData+pnum)->dirty;
+		page->strategyAttribute=(bm->mgmtData+pnum)->strategyAttribute;
 		updataAttribute(bm, bm->mgmtData+pnum);
 		fclose(fp);
 	}
@@ -348,6 +367,7 @@ RC pinPage (BM_BufferPool *const bm, BM_PageHandle *const page,
 		page->fixCounts=(bm->mgmtData+pnum)->fixCounts;
 		page->pageNum=pageNum;
 		page->dirty=(bm->mgmtData+pnum)->dirty;
+		page->strategyAttribute=(bm->mgmtData+pnum)->strategyAttribute;
 		//if(bm->strategy==RS_LRU)
 		//	updataAttribute(bm, bm->mgmtData+pnum);
 	}
