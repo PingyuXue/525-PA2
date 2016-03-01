@@ -327,6 +327,8 @@ RC pinPage (BM_BufferPool *const bm, BM_PageHandle *const page,
 		{
 			pnum=i;
 			flag=2;
+			if(bm->strategy==RS_LRU)
+				updataAttribute(bm, bm->mgmtData+pnum);
 			break;
 		}
 		if(i==bm->numPages-1)
