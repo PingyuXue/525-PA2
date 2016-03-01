@@ -339,8 +339,12 @@ RC pinPage (BM_BufferPool *const bm, BM_PageHandle *const page,
 				if((bm->mgmtData+pnum)->dirty)
 					forcePage (bm,bm->mgmtData+pnum);
 			}
-			//if(bm->strategy==RS_LRU)
-			//	pnum=strategyLRU(bm);
+			if(bm->strategy==RS_LRU)
+			{
+				pnum=strategyFIFOandLRU(bm);
+				if((bm->mgmtData+pnum)->dirty)
+					forcePage (bm,bm->mgmtData+pnum);
+			}
 		}
 	}
 	if(flag==1)
