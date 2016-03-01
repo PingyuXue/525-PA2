@@ -161,7 +161,7 @@ RC forceFlushPool(BM_BufferPool *const bm){
     dirtyFlags = getDirtyFlags(bm);
     fixCounts = getFixCounts(bm);
 
-/*    for (i = 0; i < bm->numPages; ++i) {
+    for (i = 0; i < bm->numPages; ++i) {
         if(*(dirtyFlags+i)){
 //printf("%s\n",*(dirtyFlags)?"true":"false");
             if(*(fixCounts+i)){
@@ -176,7 +176,7 @@ RC forceFlushPool(BM_BufferPool *const bm){
                 }
             }
         }
-    }*/
+    }
 	for (i = 0; i < bm->numPages; ++i) 
 	{
 		if(*(dirtyFlags+i))
@@ -243,11 +243,7 @@ RC unpinPage (BM_BufferPool *const bm, BM_PageHandle *const page)
 		if((bm->mgmtData+i)->pageNum==page->pageNum)
 		{
 	        	(bm->mgmtData+i)->fixCounts--;
-//			page->fixCounts--;
-			if((bm->mgmtData+i)->dirty==1&&(bm->mgmtData+i)->fixCounts==0)
-			{
-				forcePage(bm,page);
-			}			
+//			page->fixCounts--;			
 			break;
 		}
 	}
@@ -286,7 +282,7 @@ RC forcePage (BM_BufferPool *const bm, BM_PageHandle *const page)
 	{
 		if((bm->mgmtData+i)->pageNum==page->pageNum)
 		{
-//			(bm->mgmtData+i)->dirty=0;
+			(bm->mgmtData+i)->dirty=0;
 //			(bm->mgmtData+i)->pageNum=-1;
 			break;
 		}
@@ -336,9 +332,14 @@ RC pinPage (BM_BufferPool *const bm, BM_PageHandle *const page,
 		if(i==bm->numPages-1)
 		{
 			
-			flag=1;
+			flag=1;;
 			if(bm->strategy==RS_FIFO)
+			{
 				pnum=strategyFIFOandLRU(bm);
+				printf("replace:   %d\n",pnum);
+				if((bm->mgmtData+pnum)->dirty)
+					forcePage (bm,bm->mgmtData+pnum);
+			}
 			//if(bm->strategy==RS_LRU)
 			//	pnum=strategyLRU(bm);
 		}
