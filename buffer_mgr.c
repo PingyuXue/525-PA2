@@ -63,6 +63,7 @@ RC initBufferPool(BM_BufferPool *const bm, const char *const pageFileName,
 		  const int numPages, ReplacementStrategy strategy, 
 		  void *stratData){
     FILE *file;
+    int i;
 
     file = fopen(pageFileName, "r");
     if(file == NULL){
@@ -75,7 +76,7 @@ RC initBufferPool(BM_BufferPool *const bm, const char *const pageFileName,
     bm->strategy = strategy;
     BM_PageHandle* buff = (BM_PageHandle *)calloc(numPages, sizeof(BM_PageHandle));
     bm->mgmtData = buff;
-    for(int i=0;i<numPages;i++)
+    for(i=0;i<numPages;i++)
     {
 	(bm->mgmtData+i)->dirty=0;
 	(bm->mgmtData+i)->fixCounts=0;
@@ -208,7 +209,8 @@ RC forceFlushPool(BM_BufferPool *const bm){
 
 RC markDirty (BM_BufferPool *const bm, BM_PageHandle *const page)
 {
-	for(int i=0;i<(bm->numPages);i++)
+    int i;
+	for(i=0;i<(bm->numPages);i++)
 	{
 		if((bm->mgmtData+i)->pageNum==page->pageNum)
 		{
@@ -238,7 +240,8 @@ RC markDirty (BM_BufferPool *const bm, BM_PageHandle *const page)
 
 RC unpinPage (BM_BufferPool *const bm, BM_PageHandle *const page)
 {
-	for(int i=0;i<bm->numPages;i++)
+    int i;
+	for(i=0;i<bm->numPages;i++)
 	{
 		if((bm->mgmtData+i)->pageNum==page->pageNum)
 		{
@@ -269,6 +272,7 @@ RC unpinPage (BM_BufferPool *const bm, BM_PageHandle *const page)
 RC forcePage (BM_BufferPool *const bm, BM_PageHandle *const page)
 {
 	FILE *fp;
+    int i;
 	
 
 	
@@ -278,7 +282,7 @@ RC forcePage (BM_BufferPool *const bm, BM_PageHandle *const page)
 	(bm->numWriteIO)++;
 	fclose(fp);
 //		free(page->data);
-	for(int i=0;i<bm->numPages;i++)
+	for(i=0;i<bm->numPages;i++)
 	{
 		if((bm->mgmtData+i)->pageNum==page->pageNum)
 		{
@@ -313,8 +317,9 @@ RC pinPage (BM_BufferPool *const bm, BM_PageHandle *const page,
 {
 	int pnum;
 	int flag=0;
+    int i;
 
-	for(int i=0;i<bm->numPages;i++)
+	for(i=0;i<bm->numPages;i++)
 	{
 		if((bm->mgmtData+i)->pageNum==-1)
 		{
@@ -402,7 +407,8 @@ PageNumber *getFrameContents (BM_BufferPool *const bm){
     PageNumber *arr = (PageNumber*)malloc(bm->numPages * sizeof(PageNumber));
     BM_PageHandle *handle = bm->mgmtData;
     
-    for(int i=0; i< bm->numPages; i++){
+    int i;
+    for(i=0; i< bm->numPages; i++){
         if((handle+i)->data == NULL){
             arr[i] = NO_PAGE;
         } else {
@@ -432,7 +438,9 @@ bool *getDirtyFlags (BM_BufferPool *const bm){
     bool *arr = (bool*)malloc(bm->numPages * sizeof(bool));
     BM_PageHandle *handle = bm->mgmtData;
     
-    for(int i=0; i< bm->numPages; i++){
+    int i;
+
+    for(i=0; i< bm->numPages; i++){
         arr[i] = (handle+i)->dirty; 
     }
     return arr;
@@ -458,7 +466,8 @@ int *getFixCounts (BM_BufferPool *const bm){
     int *arr = (int*)malloc(bm->numPages * sizeof(int));
     BM_PageHandle *handle = bm->mgmtData;
     
-    for(int i=0; i< bm->numPages; i++){
+    int i;
+    for(i=0; i< bm->numPages; i++){
          arr[i] = (handle+i)->fixCounts; 
     }
     return arr;
