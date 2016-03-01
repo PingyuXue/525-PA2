@@ -561,25 +561,6 @@ int strategyFIFOandLRU(BM_BufferPool *bm) {
 }
 
 /***************************************************************
- * Function Name: strategyLRU_k
- *
- * Description: decide use which frame to save data using LRU-k strategy.
- *
- * Parameters: BM_BufferPool *bm
- *
- * Return: int
- *
- * Author:
- *
- * History:
- *      Date            Name                        Content
- *
-***************************************************************/
-
-int strategyLRU_k(BM_BufferPool *bm) {
-}
-
-/***************************************************************
  * Function Name: getAttributionArray
  *
  * Description: return an array that includes all pages strategyAttribute.
